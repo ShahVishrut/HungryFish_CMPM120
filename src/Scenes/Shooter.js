@@ -24,6 +24,8 @@ class Shooter extends Phaser.Scene {
 
         this.load.audio("death", "death.mp3");
 
+        this.load.audio("ouch", "ouch.mp3");
+
         this.load.bitmapFont('font', 'Text.png', 'Text.xml');
         
     }
@@ -43,6 +45,7 @@ class Shooter extends Phaser.Scene {
         my.sprite.music.push(this.sound.add("pop"));
         my.sprite.music.push(this.sound.add("hit"));
         my.sprite.music.push(this.sound.add("death"));
+        my.sprite.music.push(this.sound.add("ouch"));
 
         my.sprite.background1 = this.add.sprite(728,350,"background1");
         my.sprite.background2 = this.add.sprite(-3000,350,"background1");
@@ -96,7 +99,6 @@ class Shooter extends Phaser.Scene {
         this.liveDisplay.setText('Lives: ' + this.lives);
         if (this.lives == 0) {
             this.my.sprite.music[0].stop();
-            this.my.sprite.music[3].play();
             let curTime = Date.now();
             if (this.deathByFish) {
                 this.my.sprite.player.y = this.deathFish.y;
@@ -106,7 +108,7 @@ class Shooter extends Phaser.Scene {
                     return;
                 }
             }
-            
+            this.my.sprite.music[3].play();
             while (Date.now() - curTime < 2000) {
             }
             this.scene.start("gameOver", {score: this.score});
@@ -140,7 +142,9 @@ class Shooter extends Phaser.Scene {
                 this.my.sprite.enemyProjectiles[i].destroy();
                 this.my.sprite.enemyProjectiles.splice(i,1);
                 this.lives--;
+                this.my.sprite.music[4].play();
                 this.liveDisplay.setText('Lives: ' + this.lives);
+
                 i--;
             }
             
