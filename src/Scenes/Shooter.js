@@ -9,6 +9,10 @@ class Shooter extends Phaser.Scene {
         this.bodyY = 100;
     }
 
+    init(data) {
+        this.high_score = data.high_score;
+    } 
+
     preload() {
         this.load.setPath("./assets/");
 
@@ -111,7 +115,7 @@ class Shooter extends Phaser.Scene {
             this.my.sprite.music[3].play();
             while (Date.now() - curTime < 2000) {
             }
-            this.scene.start("gameOver", {score: this.score});
+            this.scene.start("gameOver", {score: this.score, high_score: this.high_score});
         }
         this.score++;
         this.projectilesDisplay.setText('Food: ' + this.projectiles);
@@ -144,7 +148,9 @@ class Shooter extends Phaser.Scene {
                 this.lives--;
                 this.my.sprite.music[4].play();
                 this.liveDisplay.setText('Lives: ' + this.lives);
-
+                if (this.lives == 0) {
+                    return;
+                }
                 i--;
             }
             
@@ -254,6 +260,7 @@ class Shooter extends Phaser.Scene {
                     projectileGone = true;
                     this.my.sprite.music[2].play();
                     this.projectiles += 2;
+                    this.score += 100;
                     break;
                 }
             }
@@ -270,6 +277,7 @@ class Shooter extends Phaser.Scene {
                     this.my.sprite.activeProjectiles.splice(i, 1);
                     this.my.sprite.music[2].play();
                     this.projectiles += 2;
+                    this.score += 200;
                     i--;
                     break;
                 }
