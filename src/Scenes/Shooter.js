@@ -9,7 +9,6 @@ class Shooter extends Phaser.Scene {
         this.bodyY = 100;
     }
 
-    // Use preload to load art and sound assets before the scene starts running.
     preload() {
         this.load.setPath("./assets/");
 
@@ -22,6 +21,8 @@ class Shooter extends Phaser.Scene {
         this.load.audio("pop", "pop.mp3");
 
         this.load.audio("hit", "hit.mp3");
+
+        this.load.audio("death", "death.mp3");
 
         this.load.bitmapFont('font', 'Text.png', 'Text.xml');
         
@@ -41,6 +42,7 @@ class Shooter extends Phaser.Scene {
 
         my.sprite.music.push(this.sound.add("pop"));
         my.sprite.music.push(this.sound.add("hit"));
+        my.sprite.music.push(this.sound.add("death"));
 
         my.sprite.background1 = this.add.sprite(728,350,"background1");
         my.sprite.background2 = this.add.sprite(-3000,350,"background1");
@@ -85,15 +87,32 @@ class Shooter extends Phaser.Scene {
         this.projectilesDisplay = this.add.bitmapText(10, 7, 'font', 'Food: 20', 20);
         this.liveDisplay = this.add.bitmapText(170, 7, 'font', 'Lives: 5', 20);
         this.scoreDisplay = this.add.bitmapText(this.width - 10, 30, 'font', 'Score: 0', 20);
+
+        this.deathByFish = false;
+        this.deathFish = null;
     }
 
     update(time, delta) {
+        this.liveDisplay.setText('Lives: ' + this.lives);
         if (this.lives == 0) {
-
+            this.my.sprite.music[0].stop();
+            this.my.sprite.music[3].play();
+            let curTime = Date.now();
+            if (this.deathByFish) {
+                this.my.sprite.player.y = this.deathFish.y;
+                if (this.my.sprite.player.x < this.width) {
+                    this.deathFish.x += 10;
+                    this.my.sprite.player.x += 10;
+                    return;
+                }
+            }
+            
+            while (Date.now() - curTime < 2000) {
+            }
+            this.scene.start("gameOver", {score: this.score});
         }
         this.score++;
         this.projectilesDisplay.setText('Food: ' + this.projectiles);
-        this.liveDisplay.setText('Lives: ' + this.lives);
         this.scoreDisplay.setText('Score: ' + this.score).setOrigin(1);
         if (time - this.lastEnemyBullet > this.bulletGap) {
             let numEnemies = this.my.sprite.curveEnemies.length + this.my.sprite.zigzagEnemies.length;
@@ -121,6 +140,7 @@ class Shooter extends Phaser.Scene {
                 this.my.sprite.enemyProjectiles[i].destroy();
                 this.my.sprite.enemyProjectiles.splice(i,1);
                 this.lives--;
+                this.liveDisplay.setText('Lives: ' + this.lives);
                 i--;
             }
             
@@ -229,6 +249,7 @@ class Shooter extends Phaser.Scene {
                     this.my.sprite.activeProjectiles.splice(i, 1);
                     projectileGone = true;
                     this.my.sprite.music[2].play();
+                    this.projectiles += 2;
                     break;
                 }
             }
@@ -244,6 +265,7 @@ class Shooter extends Phaser.Scene {
                     this.my.sprite.zigzagEnemies.splice(j, 1);
                     this.my.sprite.activeProjectiles.splice(i, 1);
                     this.my.sprite.music[2].play();
+                    this.projectiles += 2;
                     i--;
                     break;
                 }
@@ -253,12 +275,16 @@ class Shooter extends Phaser.Scene {
         for (let j = 0; j < this.my.sprite.curveEnemies.length; j++) {
             if (Math.abs(this.my.sprite.curveEnemies[j][0].x - this.my.sprite.player.x) < this.curveRX + this.playerRX && Math.abs(this.my.sprite.curveEnemies[j][0].y - this.my.sprite.player.y) < this.curveRY + this.playerRY) {
                 this.lives = 0;
+                this.deathByFish = true;
+                this.deathFish = this.my.sprite.curveEnemies[j][0];
                 return;
             }
         }
         for (let j = 0; j < this.my.sprite.zigzagEnemies.length; j++) {
             if (Math.abs(this.my.sprite.zigzagEnemies[j][0].x - this.my.sprite.player.x) < this.zigzagRX + this.playerRX && Math.abs(this.my.sprite.zigzagEnemies[j][0].y - this.my.sprite.player.y) < this.zigzagRY + this.playerRY) {
                 this.lives = 0;
+                this.deathByFish = true;
+                this.deathFish = this.my.sprite.zigzagEnemies[j][0];
                 return;
             }
         }

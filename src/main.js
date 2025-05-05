@@ -8,7 +8,7 @@ let config = {
     },
     width: 800,
     height: 600,
-    scene: [Shooter],
+    scene: [Shooter, GameOver],
     fps: { forceSetTimeOut: true, target: 30 }
 }
 
